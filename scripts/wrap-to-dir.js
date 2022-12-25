@@ -4,9 +4,11 @@ import { moveToDir } from './move-to-dir.js';
 
 export function wrapDirFilesToDirs(dir) {
     fs.readdir(dir, (err, files) => {
-        files.forEach(file => {
-            wrapFileToDir(file, dir);
-        });
+        files
+            .filter(name => fs.existsSync(path.join(dir, name)) && !fs.lstatSync(path.join(dir, name)).isDirectory())
+            .forEach(file => {
+                wrapFileToDir(file, dir);
+            });
     });
 }
 
