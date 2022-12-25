@@ -1,7 +1,26 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-function checkMatchRecursive(data) {
+export function flatMapChildrenRecursive(data, directories, files) {
+    if (data.allChildren?.length) {
+        return [
+            ...data.allChildren.map(name => path.join(data.dir, name)),
+            ...data.children.flatMap(child =>
+                flatMapChildrenRecursive(child, directories, files),
+            ),
+        ]
+            .filter(p => fs.existsSync(p))
+            .filter(p =>
+                !fs.lstatSync(p).isDirectory() || directories,
+            )
+            .filter(p =>
+                fs.lstatSync(p).isDirectory() || files,
+            );
+    }
+    return [];
+}
+
+export function checkMatchRecursive(data) {
     if (!data.matchedChildren?.length) {
         if ( data.children.length ) {
             return data.children.some(checkMatchRecursive);

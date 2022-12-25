@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-export async function moveToDir(fileName, currDir, newDir, callback) {
-    const currPath = path.join(dir, fileName);
+export function moveToDir(fileName, currDir, newDir, callback) {
+    const currPath = path.join(currDir, fileName);
     const newPath = path.join(newDir, fileName);
     if (!currDir || !fileName || !fs.existsSync(currPath)) {
         console.log('Unable to read dir or file!');
@@ -16,11 +16,15 @@ export async function moveToDir(fileName, currDir, newDir, callback) {
             if (err.code === 'EXDEV') {
                 copy();
             } else {
-                callback(err);
+                if (callback) {
+                    callback(err);
+                }
             }
             return;
         }
-        callback();
+        if (callback) {
+            callback();
+        }
     });
 
     function copy() {
@@ -31,7 +35,7 @@ export async function moveToDir(fileName, currDir, newDir, callback) {
         writeStream.on('error', callback);
 
         readStream.on('close', function () {
-            fs.unlink(oldPath, callback);
+            fs.unlink(currPath, callback);
         });
 
         readStream.pipe(writeStream);
